@@ -1,0 +1,97 @@
+{
+  "name": "Stock",
+  "type": "object",
+  "properties": {
+    "symbol": {
+      "type": "string",
+      "description": "Stock ticker symbol (e.g., AAPL)"
+    },
+    "shares": {
+      "type": "number",
+      "description": "Number of shares owned"
+    },
+    "purchase_price": {
+      "type": "number",
+      "description": "Price per share when purchased"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the stock was purchased"
+    },
+    "current_price": {
+      "type": "number",
+      "description": "Current price per share"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Full company name"
+    },
+    "sector": {
+      "type": "string",
+      "description": "Company sector (GICS or custom)"
+    },
+    "gics_sector": {
+      "type": "string",
+      "enum": [
+        "Energy",
+        "Materials",
+        "Industrials",
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Health Care",
+        "Financials",
+        "Information Technology",
+        "Communication Services",
+        "Utilities",
+        "Real Estate"
+      ],
+      "description": "GICS sector classification"
+    },
+    "country": {
+      "type": "string",
+      "description": "Company headquarters country"
+    },
+    "market_cap": {
+      "type": "number",
+      "description": "Market capitalization"
+    },
+    "analyst_sentiment": {
+      "type": "object",
+      "properties": {
+        "average_rating": {
+          "type": "string",
+          "enum": [
+            "Strong Buy",
+            "Buy",
+            "Hold",
+            "Sell",
+            "Strong Sell"
+          ]
+        },
+        "price_target": {
+          "type": "number"
+        },
+        "num_analysts": {
+          "type": "number"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Analyst sentiment and recommendations"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last price update timestamp"
+    }
+  },
+  "required": [
+    "symbol",
+    "shares"
+  ]
+}
