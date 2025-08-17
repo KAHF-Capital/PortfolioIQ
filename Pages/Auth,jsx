@@ -1,0 +1,153 @@
+import React, { useState, useEffect } from "react";
+import { User } from "@/entities/User";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { TrendingUp, Mail, User as UserIcon, Phone, LogIn, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+export default function Auth() {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: ""
+  });
+
+  useEffect(() => {
+    checkExistingAuth();
+  }, []);
+
+  const checkExistingAuth = async () => {
+    try {
+      const user = await User.me();
+      if (user) {
+        // User is already authenticated, redirect to portfolio
+        navigate(createPageUrl("Portfolio"));
+        return;
+      }
+    } catch (error) {
+      // User not authenticated, show login
+    }
+    setIsCheckingAuth(false);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      await User.login();
+      // Login will redirect automatically, but just in case:
+      setTimeout(() => {
+        navigate(createPageUrl("Portfolio"));
+      }, 1000);
+    } catch (error) {
+      setError("Login failed. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.full_name) {
+      setError("Please enter your full name.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      // Update the current user's profile data
+      await User.updateMyUserData({
+        phone: formData.phone
+      });
+      
+      navigate(createPageUrl("Portfolio"));
+    } catch (error) {
+      setError("Failed to update profile. Please try again.");
+    }
+    
+    setIsLoading(false);
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl flex items-center justify-center shadow-lg mx-auto mb-4">
+            <TrendingUp className="w-7 h-7 text-white animate-pulse" />
+          </div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+              <TrendingUp className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold navy-text">PortfolioIQ</h1>
+              <p className="text-sm text-slate-600">by KAHF Capital</p>
+            </div>
+          </div>
+          <p className="text-slate-600">Investment Analytics Platform</p>
+        </div>
+
+        <Card className="shadow-xl border-0">
+          <CardHeader className="gradient-bg text-white">
+            <CardTitle className="flex items-center gap-2 justify-center">
+              <LogIn className="w-5 h-5" />
+              Sign In to Continue
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-6">
+              <p className="text-center text-slate-600">
+                Sign in with your Google account to access your portfolio
+              </p>
+              <Button
+                onClick={handleLogin}
+                disabled={isLoading}
+                className="w-full bg-slate-800 hover:bg-slate-900 py-3"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in with Google"
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
